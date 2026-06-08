@@ -33,7 +33,11 @@ class DataFetcher:
             DataFrame: 包含日期、开盘价、收盘价、最高价、最低价、成交量等
         """
         if self.source == 'baostock':
-            return self._get_from_baostock(code, start_date, end_date)
+            df = self._get_from_baostock(code, start_date, end_date)
+            if df is None or df.empty:
+                print("baostock获取失败，尝试akshare...")
+                return self._get_from_akshare(code, start_date, end_date)
+            return df
         else:
             return self._get_from_akshare(code, start_date, end_date)
 
@@ -44,7 +48,6 @@ class DataFetcher:
         if end_date is None:
             end_date = datetime.now().strftime('%Y-%m-%d')
 
-        # 转换股票代码格式
         if code.startswith('6'):
             bs_code = f"sh.{code}"
         else:
@@ -62,12 +65,22 @@ class DataFetcher:
         while rs.error_code == '0' and rs.next():
             data_list.append(rs.get_row_data())
 
+        if not data_list:
+            print(f"baostock返回空数据: {bs_code}")
+            return None
+
         df = pd.DataFrame(data_list, columns=rs.fields)
-        df['open'] = df['open'].astype(float)
-        df['high'] = df['high'].astype(float)
-        df['low'] = df['low'].astype(float)
-        df['close'] = df['close'].astype(float)
-        df['volume'] = df['volume'].astype(float)
+        
+        try:
+            df['open'] = df['open'].astype(float)
+            df['high'] = df['high'].astype(float)
+            df['low'] = df['low'].astype(float)
+            df['close'] = df['close'].astype(float)
+            df['volume'] = df['volume'].astype(float)
+        except KeyError as e:
+            print(f"baostock列名错误: {e}, 可用列: {df.columns.tolist()}")
+            return None
+        
         return df
 
     def _get_from_akshare(self, code, start_date, end_date):
