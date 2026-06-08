@@ -124,6 +124,7 @@ body {
 /* 快速开始 */
 .quick-start {
     padding: 2rem 0 4rem;
+    text-align: center;
 }
 
 .quick-start h2 {
@@ -131,13 +132,33 @@ body {
     margin-bottom: 2rem;
 }
 
-.code-block {
-    background: var(--primary-color);
-    color: #ecf0f1;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    font-family: "Courier New", monospace;
-    overflow-x: auto;
+.start-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: white;
+    text-decoration: none;
+    padding: 1.25rem 2.5rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.start-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+}
+
+.button-icon {
+    font-size: 1.5rem;
+}
+
+.button-text {
+    white-space: nowrap;
 }
 
 /* 页脚 */
