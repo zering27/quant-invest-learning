@@ -24,6 +24,23 @@ async function fetchAPI(url, options = {}) {
     return await response.json();
 }
 
+function formatPercent(value) {
+    if (value === null || value === undefined || isNaN(value)) {
+        return '--';
+    }
+    return (value * 100).toFixed(2) + '%';
+}
+
+function formatNumber(value) {
+    if (value === null || value === undefined || isNaN(value)) {
+        return '--';
+    }
+    return value.toLocaleString('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
 async function handleBacktest(e) {
     e.preventDefault();
 
