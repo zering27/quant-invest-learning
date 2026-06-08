@@ -7,6 +7,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+async function fetchAPI(url, options = {}) {
+    const defaultOptions = {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        ...options
+    };
+
+    const response = await fetch(url, defaultOptions);
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+}
+
 async function handleBacktest(e) {
     e.preventDefault();
 
