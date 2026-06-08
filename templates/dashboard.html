@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘 - 量化投资学习系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">量化投资学习系统</a>
+            <ul class="nav-menu">
+                <li><a href="/">首页</a></li>
+                <li><a href="/dashboard" class="active">仪表盘</a></li>
+                <li><a href="/backtest">回测</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>策略仪表盘</h1>
+
+        <section class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>总收益率</h3>
+                <div id="totalReturn" class="metric-value">--</div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>年化收益率</h3>
+                <div id="annualReturn" class="metric-value">--</div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>夏普比率</h3>
+                <div id="sharpeRatio" class="metric-value">--</div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>最大回撤</h3>
+                <div id="maxDrawdown" class="metric-value">--</div>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <h2>权益曲线</h2>
+            <div id="equityCurve" class="large-chart"></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 量化投资学习系统 - 仅供学习交流使用</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

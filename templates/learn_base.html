@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}量化投资学习系统{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/learn.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            <a href="/" class="logo">📈 量化投资学习系统</a>
+        </div>
+        <div class="nav-right">
+            <a href="/" class="nav-link">首页</a>
+            <a href="/learn" class="nav-link">学习中心</a>
+            <a href="/backtest" class="nav-link">回测</a>
+        </div>
+    </nav>
+
+    <!-- 顶部进度条 -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar" style="width: {% block progress %}0{% endblock %}%;"></div>
+    </div>
+    <div class="progress-label">{% block progress_text %}学习中...{% endblock %}</div>
+
+    <div class="main-container">
+        <!-- 左侧导航栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>📚 学习目录</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item {% if request.endpoint == 'learn' or request.endpoint == 'learn_python' %}active{% endif %}">
+                    <a href="/learn/python">1️⃣ Python金融编程</a>
+                    <ul class="submenu">
+                        <li><a href="/learn/python#why-python">为什么用Python</a></li>
+                        <li><a href="/learn/python#pandas-basics">Pandas基础</a></li>
+                        <li><a href="/learn/python#numpy-math">NumPy数学计算</a></li>
+                        <li><a href="/learn/python#visualization">数据可视化</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item {% if request.endpoint == 'learn_data' %}active{% endif %}">
+                    <a href="/learn/data">2️⃣ 金融市场数据</a>
+                    <ul class="submenu">
+                        <li><a href="/learn/data#data-importance">数据的重要性</a></li>
+                        <li><a href="/learn/data#baostock">baostock数据源</a></li>
+                        <li><a href="/learn/data#get-ohlcv">获取OHLCV数据</a></li>
+                        <li><a href="/learn/data#data-cleaning">数据清洗</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item {% if request.endpoint == 'learn_indicators' %}active{% endif %}">
+                    <a href="/learn/indicators">3️⃣ 技术分析指标</a>
+                    <ul class="submenu">
+                        <li><a href="/learn/indicators#what-indicator">什么是技术指标</a></li>
+                        <li><a href="/learn/indicators#ma">移动平均线MA</a></li>
+                        <li><a href="/learn/indicators#macd">MACD指标</a></li>
+                        <li><a href="/learn/indicators#rsi">RSI相对强弱</a></li>
+                        <li><a href="/learn/indicators#bollinger">布林带</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item {% if request.endpoint == 'learn_backtest' %}active{% endif %}">
+                    <a href="/learn/backtest">4️⃣ 策略回测框架</a>
+                    <ul class="submenu">
+                        <li><a href="/learn/backtest#why-backtest">为什么需要回测</a></li>
+                        <li><a href="/learn/backtest#event-driven">事件驱动回测</a></li>
+                        <li><a href="/learn/backtest#ma-cross">均线交叉策略</a></li>
+                        <li><a href="/learn/backtest#performance">绩效评估指标</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item {% if request.endpoint == 'learn_risk' %}active{% endif %}">
+                    <a href="/learn/risk">5️⃣ 风险管理与实战</a>
+                    <ul class="submenu">
+                        <li><a href="/learn/risk#risk-nature">风险的本质</a></li>
+                        <li><a href="/learn/risk#stop-loss">止损止盈策略</a></li>
+                        <li><a href="/learn/risk#position">仓位管理</a></li>
+                        <li><a href="/learn/risk#var">VaR风险价值</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 量化投资学习系统 - 仅供学习交流使用，投资有风险，入市需谨慎</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/learn.js') }}"></script>
+</body>
+</html>

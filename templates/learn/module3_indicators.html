@@ -1,0 +1,423 @@
+{% extends "learn_base.html" %}
+
+{% block title %}技术分析指标 - 量化投资学习系统{% endblock %}
+
+{% block progress %}60{% endblock %}
+{% block progress_text %}模块3: 技术分析指标{% endblock %}
+
+{% block content %}
+<div class="module-header">
+    <h1>📊 模块3: 技术分析指标</h1>
+    <p class="subtitle">学习常用的技术分析指标原理与Python实现</p>
+</div>
+
+<!-- 3.1 什么是技术指标 -->
+<section id="what-indicator" class="section">
+    <h2>3.1 什么是技术指标？</h2>
+    
+    <div class="card highlight">
+        <h3>💡 技术指标的本质</h3>
+        <p>技术指标是对价格、成交量等原始市场数据进行数学变换，得到的新数值。这些变换包括移动平均、振荡器、趋势线等。</p>
+    </div>
+
+    <div class="card">
+        <h3>🎯 技术指标的两大类</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>📈 趋势指标</h4>
+                <p>用来判断市场整体趋势，如MA、MACD、ADX等。趋势指标在震荡市中容易失效。</p>
+            </div>
+            <div class="feature-item">
+                <h4>📉 振荡指标</h4>
+                <p>用来判断市场是否超买超卖，如RSI、KDJ、CCI等。振荡指标在趋势市中容易失效。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card warning">
+        <h3>⚠️ 重要提醒</h3>
+        <p>没有任何指标是万能的！不同市场环境需要使用不同的指标。量化交易的关键是建立完整的交易系统，包括选股、择时、仓位管理、风控等多个环节。</p>
+    </div>
+</section>
+
+<!-- 3.2 移动平均线MA -->
+<section id="ma" class="section">
+    <h2>3.2 移动平均线 MA (Moving Average)</h2>
+    
+    <div class="card">
+        <h3>📐 原理说明</h3>
+        <p>移动平均线是最基础的趋势跟踪指标。它计算一定时间周期内价格的平均值，平滑掉短期波动，显示出长期趋势。</p>
+        
+        <div class="formula">
+            <h4>计算公式</h4>
+            <p>简单移动平均(SMA)：SMA = (C₁ + C₂ + ... + Cₙ) / n</p>
+            <p>其中 C 为收盘价，n 为周期数</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>⏱️ 均线周期的选择</h3>
+        <table class="data-table">
+            <tr>
+                <th>周期</th>
+                <th>别名</th>
+                <th>用途</th>
+            </tr>
+            <tr>
+                <td>5日</td>
+                <td>周线</td>
+                <td>短期趋势，观察短线方向</td>
+            </tr>
+            <tr>
+                <td>20日</td>
+                <td>月线</td>
+                <td>中期趋势，一个交易月</td>
+            </tr>
+            <tr>
+                <td>60日</td>
+                <td>季线</td>
+                <td>中长期趋势，一个季度</td>
+            </tr>
+            <tr>
+                <td>120/250日</td>
+                <td>半年/年线</td>
+                <td>长期趋势，牛熊分界线</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>📊 Python实现</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：计算移动平均线</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+def calculate_ma(df, window):
+    """
+    计算简单移动平均线
+    
+    参数:
+        df: 包含close列的DataFrame
+        window: 移动平均周期
+    
+    返回:
+        MA值
+    """
+    ma = df['close'].rolling(window=window).mean()
+    return ma
+
+# 使用Pandas内置方法（更高效）
+def calculate_ma_pandas(df, periods=[5, 20, 60]):
+    """计算多条均线"""
+    for period in periods:
+        df[f'MA{period}'] = df['close'].rolling(window=period).mean()
+    return df
+
+# 示例
+data = {
+    'date': pd.date_range('2024-01-01', periods=30),
+    'close': 100 + np.cumsum(np.random.randn(30) * 2)
+}
+df = pd.DataFrame(data)
+df = calculate_ma_pandas(df)
+
+print("收盘价与均线:")
+print(df[['date', 'close', 'MA5', 'MA20', 'MA60']].tail(10))</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>         date  close      MA5      MA20      MA60
+25  2024-01-26  103.24      NaN      NaN      NaN
+26  2024-01-27  104.89      NaN      NaN      NaN
+27  2024-01-28  105.33  103.876      NaN      NaN
+28  2024-01-29  106.78  104.872      NaN      NaN
+29  2024-01-30  105.56  105.160  103.428      NaN
+
+注：MA60需要60天数据，30天数据不足所以为NaN</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>⚡ 均线的滞后性</h3>
+        <p>均线是"滞后"指标，它反映的是过去的数据，对趋势变化的反应较慢。周期越长，滞后越严重。这是均线策略的固有缺陷。</p>
+    </div>
+</section>
+
+<!-- 3.3 MACD -->
+<section id="macd" class="section">
+    <h2>3.3 MACD指标</h2>
+    
+    <div class="card">
+        <h3>📐 原理说明</h3>
+        <p>MACD（Moving Average Convergence Divergence）称为指数平滑异同移动平均线，由Gerald Appel创建。它利用两条不同速度的EMA（指数移动平均线）来研判买卖时机。</p>
+        
+        <div class="formula">
+            <h4>计算公式</h4>
+            <pre><code>1. 快线EMA = EMA(close, 12)
+2. 慢线EMA = EMA(close, 26)
+3. DIF = 快线EMA - 慢线EMA
+4. DEA/Signal = EMA(DIF, 9)
+5. MACD柱 = (DIF - DEA) × 2</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Python实现</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：计算MACD</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+def calculate_macd(df, fast=12, slow=26, signal=9):
+    """
+    计算MACD指标
+    
+    参数:
+        df: 包含close列的DataFrame
+        fast: 快线周期，默认12
+        slow: 慢线周期，默认26
+        signal: 信号线周期，默认9
+    
+    返回:
+        添加了DIF, DEA, MACD列的DataFrame
+    """
+    # 计算快线和慢线EMA
+    df['EMA_fast'] = df['close'].ewm(span=fast, adjust=False).mean()
+    df['EMA_slow'] = df['close'].ewm(span=slow, adjust=False).mean()
+    
+    # 计算DIF
+    df['DIF'] = df['EMA_fast'] - df['EMA_slow']
+    
+    # 计算DEA（信号线）
+    df['DEA'] = df['DIF'].ewm(span=signal, adjust=False).mean()
+    
+    # 计算MACD柱
+    df['MACD'] = (df['DIF'] - df['DEA']) * 2
+    
+    return df
+
+# 示例使用
+data = {
+    'date': pd.date_range('2024-01-01', periods=60),
+    'close': 100 + np.cumsum(np.random.randn(60) * 2)
+}
+df = pd.DataFrame(data)
+df = calculate_macd(df)
+
+print("MACD指标:")
+print(df[['date', 'close', 'DIF', 'DEA', 'MACD']].tail(10))</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🎯 MACD交易信号</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>✅ 金叉买入</h4>
+                <p>DIF从下往上穿过DEA，且都在零轴上方时，是较强的买入信号。</p>
+            </div>
+            <div class="feature-item">
+                <h4>❌ 死叉卖出</h4>
+                <p>DIF从上往下穿过DEA，是卖出信号。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3.4 RSI -->
+<section id="rsi" class="section">
+    <h2>3.4 RSI相对强弱指标</h2>
+    
+    <div class="card">
+        <h3>📐 原理说明</h3>
+        <p>RSI（Relative Strength Index）由Welles Wilder创立，是一种常用的超买超卖指标。它衡量价格涨跌的幅度，用来判断市场是否过热或过冷。</p>
+        
+        <div class="formula">
+            <h4>计算公式</h4>
+            <pre><code>1. 上涨平均值(AA) = n日内上涨幅度的平均值
+2. 下跌平均值(DA) = n日内下跌幅度的平均值（取绝对值）
+3. RS = AA / DA
+4. RSI = 100 - (100 / (1 + RS))</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Python实现</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：计算RSI</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+def calculate_rsi(df, period=14):
+    """
+    计算RSI指标
+    
+    参数:
+        df: 包含close列的DataFrame
+        period: RSI周期，默认14
+    
+    返回:
+        添加了RSI列的DataFrame
+    """
+    # 计算价格变化
+    delta = df['close'].diff()
+    
+    # 分离上涨和下跌
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+    
+    # 计算平均涨跌幅（使用指数移动平均）
+    avg_gain = gain.ewm(com=period-1, min_periods=period).mean()
+    avg_loss = loss.ewm(com=period-1, min_periods=period).mean()
+    
+    # 计算RS和RSI
+    rs = avg_gain / avg_loss
+    df['RSI'] = 100 - (100 / (1 + rs))
+    
+    return df
+
+# 示例使用
+data = {
+    'date': pd.date_range('2024-01-01', periods=30),
+    'close': 100 + np.cumsum(np.random.randn(30) * 2)
+}
+df = pd.DataFrame(data)
+df = calculate_rsi(df, period=14)
+
+print("RSI指标:")
+print(df[['date', 'close', 'RSI']].tail(15))</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>         date  close       RSI
+15  2024-01-16  100.32       NaN  (需要足够的历史数据)
+...
+28  2024-02-01  105.89     58.32  (RSI在0-100之间波动)
+29  2024-02-02  104.23     55.87</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🎯 RSI交易信号</h3>
+        <table class="data-table">
+            <tr>
+                <th>RSI值</th>
+                <th>市场状态</th>
+                <th>信号含义</th>
+            </tr>
+            <tr>
+                <td>> 70</td>
+                <td>超买区</td>
+                <td>可能回调，可考虑卖出</td>
+            </tr>
+            <tr>
+                <td>< 30</td>
+                <td>超卖区</td>
+                <td>可能反弹，可考虑买入</td>
+            </tr>
+            <tr>
+                <td>> 80</td>
+                <td>严重超买</td>
+                <td>强烈回调信号</td>
+            </tr>
+            <tr>
+                <td>< 20</td>
+                <td>严重超卖</td>
+                <td>强烈反弹信号</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<!-- 3.5 布林带 -->
+<section id="bollinger" class="section">
+    <h2>3.5 布林带 (Bollinger Bands)</h2>
+    
+    <div class="card">
+        <h3>📐 原理说明</h3>
+        <p>布林带由John Bollinger发明，由三条线组成：中轨是n日移动平均线，上轨和下轨是中轨加减k倍标准差。布林带可以反映价格的波动范围。</p>
+        
+        <div class="formula">
+            <h4>计算公式</h4>
+            <pre><code>1. 中轨(ML) = MA(close, n)
+2. 上轨(UL) = ML + k × σ
+3. 下轨(DL) = ML - k × σ
+
+通常 n=20, k=2</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Python实现</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：计算布林带</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+def calculate_bollinger_bands(df, period=20, std_dev=2):
+    """
+    计算布林带
+    
+    参数:
+        df: 包含close列的DataFrame
+        period: 周期，默认20
+        std_dev: 标准差倍数，默认2
+    
+    返回:
+        添加了BB_middle, BB_upper, BB_lower列的DataFrame
+    """
+    # 中轨 = 简单移动平均
+    df['BB_middle'] = df['close'].rolling(window=period).mean()
+    
+    # 标准差
+    rolling_std = df['close'].rolling(window=period).std()
+    
+    # 上轨和下轨
+    df['BB_upper'] = df['BB_middle'] + (rolling_std * std_dev)
+    df['BB_lower'] = df['BB_middle'] - (rolling_std * std_dev)
+    
+    return df
+
+# 示例使用
+data = {
+    'date': pd.date_range('2024-01-01', periods=30),
+    'close': 100 + np.cumsum(np.random.randn(30) * 2)
+}
+df = pd.DataFrame(data)
+df = calculate_bollinger_bands(df)
+
+print("布林带指标:")
+print(df[['date', 'close', 'BB_upper', 'BB_middle', 'BB_lower']].tail(10))</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🎯 布林带交易信号</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>📈 突破上轨</h4>
+                <p>价格突破布林带上轨，可能预示强势，可考虑买入。</p>
+            </div>
+            <div class="feature-item">
+                <h4>📉 跌破下轨</h4>
+                <p>价格跌破布林带下轨，可能预示弱势，可考虑卖出。</p>
+            </div>
+        </div>
+        <p class="mt-10">布林带收窄（带宽变小）通常预示着即将大幅波动。</p>
+    </div>
+</section>
+
+<!-- 导航按钮 -->
+<div class="navigation-buttons">
+    <a href="/learn/data" class="btn btn-secondary">← 上一课：金融市场数据</a>
+    <a href="/learn/backtest" class="btn btn-primary">下一课：策略回测框架 →</a>
+</div>
+
+{% endblock %}

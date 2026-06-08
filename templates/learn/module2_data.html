@@ -1,0 +1,275 @@
+{% extends "learn_base.html" %}
+
+{% block title %}金融市场数据获取 - 量化投资学习系统{% endblock %}
+
+{% block progress %}40{% endblock %}
+{% block progress_text %}模块2: 金融市场数据{% endblock %}
+
+{% block content %}
+<div class="module-header">
+    <h1>📈 模块2: 金融市场数据获取</h1>
+    <p class="subtitle">学习如何获取和预处理股票市场数据</p>
+</div>
+
+<!-- 2.1 数据的重要性 -->
+<section id="data-importance" class="section">
+    <h2>2.1 数据的重要性</h2>
+    
+    <div class="card highlight">
+        <h3>💡 核心理念：Garbage In, Garbage Out</h3>
+        <p>量化投资的核心是数据。再好的策略，如果数据质量不行，结果也是垃圾。</p>
+    </div>
+
+    <div class="card">
+        <h3>🎯 数据质量的四个维度</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>✅ 准确性</h4>
+                <p>数据必须正确反映市场真实情况。价格、成交量等数据不能有错误。</p>
+            </div>
+            <div class="feature-item">
+                <h4>⏰ 完整性</h4>
+                <p>数据不能有遗漏，特别是交易日、停牌日等边界情况要处理妥当。</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔄 一致性</h4>
+                <p>数据格式要统一，前复权、后复权要分清楚，避免价格出现断层。</p>
+            </div>
+            <div class="feature-item">
+                <h4>📅 时效性</h4>
+                <p>有些数据需要实时获取，有些可以接受T-1数据，要根据策略需求选择。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 2.2 baostock免费数据源 -->
+<section id="baostock" class="section">
+    <h2>2.2 baostock免费数据源介绍</h2>
+    
+    <p>baostock是一个免费的Python金融数据接口，无需注册即可使用，数据质量较高。</p>
+
+    <div class="card">
+        <h3>📦 安装和基本使用</h3>
+        
+        <div class="code-section">
+            <h4>安装baostock：</h4>
+            <pre><code class="language-python">pip install baostock</code></pre>
+        </div>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import baostock as bs
+import pandas as pd
+
+# 登录系统
+lg = bs.login()
+
+# 查询沪市A股所有股票
+rs = bs.query_all_stock(day="2024-01-05")
+data_list = []
+while (rs.error_code == '0') & rs.next():
+    data_list.append(rs.get_row_data())
+stocks = pd.DataFrame(data_list, columns=rs.fields)
+print(stocks.head(10))
+
+# 登出系统
+bs.logout()</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>      code code_name    type
+0  sh.600000    浦发银行    1
+1  sh.600016    民生银行    1
+2  sh.600028    中国石化    1
+3  sh.600030    中信证券    1
+4  sh.600031    三一重工    1
+...</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 2.3 获取股票历史OHLCV数据 -->
+<section id="get-ohlcv" class="section">
+    <h2>2.3 获取股票历史OHLCV数据</h2>
+    
+    <p>OHLCV是Open（开盘价）、High（最高价）、Low（最低价）、Close（收盘价）、Volume（成交量）的缩写。</p>
+
+    <div class="card">
+        <h3>📊 获取单只股票历史数据</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import baostock as bs
+import pandas as pd
+
+# 登录
+bs.login()
+
+# 获取平安银行(000001)日K线数据
+rs = bs.query_history_k_data_plus(
+    "sz.000001",  # 股票代码
+    "date,code,open,high,low,close,volume,amount",
+    start_date='2024-01-01',
+    end_date='2024-12-31',
+    frequency="d"  # 日线
+)
+
+# 转换为DataFrame
+data_list = []
+while (rs.error_code == '0') & rs.next():
+    data_list.append(rs.get_row_data())
+df = pd.DataFrame(data_list, columns=rs.fields)
+
+# 数据类型转换
+df['open'] = df['open'].astype(float)
+df['high'] = df['high'].astype(float)
+df['low'] = df['low'].astype(float)
+df['close'] = df['close'].astype(float)
+df['volume'] = df['volume'].astype(float)
+
+print(df.head(10))
+print(f"\n数据形状: {df.shape}")
+
+# 登出
+bs.logout()</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>         date      code    open   high    low  close     volume      amount
+0  2024-01-02  sz.000001  10.50  10.65  10.45  10.60  34567890.0  365432100.0
+1  2024-01-03  sz.000001  10.60  10.75  10.55  10.70  31234567.0  333456789.0
+2  2024-01-04  sz.000001  10.70  10.80  10.60  10.65  29876543.0  318901234.0
+...
+
+数据形状: (244, 8)</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📥 批量获取多只股票数据</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import baostock as bs
+import pandas as pd
+
+def get_stock_data(stock_code, start_date, end_date):
+    """获取单只股票数据"""
+    bs.login()
+    rs = bs.query_history_k_data_plus(
+        stock_code,
+        "date,code,open,high,low,close,volume",
+        start_date=start_date,
+        end_date=end_date,
+        frequency="d"
+    )
+    data_list = []
+    while (rs.error_code == '0') & rs.next():
+        data_list.append(rs.get_row_data())
+    df = pd.DataFrame(data_list, columns=rs.fields)
+    bs.logout()
+    return df
+
+# 批量获取
+stocks = ['sh.600000', 'sh.600036', 'sh.000001']
+all_data = {}
+for code in stocks:
+    df = get_stock_data(code, '2024-01-01', '2024-12-31')
+    all_data[code] = df
+    print(f"{code}: {len(df)} 条记录")
+
+# 合并数据
+combined_df = pd.concat(all_data.values(), ignore_index=True)
+print(f"\n总记录数: {len(combined_df)}")</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 2.4 数据清洗和预处理 -->
+<section id="data-cleaning" class="section">
+    <h2>2.4 数据清洗和预处理</h2>
+    
+    <p>原始数据往往存在各种问题，需要进行清洗才能用于策略回测。</p>
+
+    <div class="card">
+        <h3>🧹 常见数据问题及处理方法</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：完整的数据清洗流程</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+def clean_stock_data(df):
+    """股票数据清洗完整流程"""
+    
+    # 1. 处理缺失值
+    print(f"原始数据量: {len(df)}")
+    df = df.dropna()  # 删除包含缺失值的行
+    print(f"删除缺失值后: {len(df)}")
+    
+    # 2. 处理停牌日（价格为0或NaN的行）
+    df = df[df['close'] > 0]
+    print(f"删除价格为0后: {len(df)}")
+    
+    # 3. 删除重复日期
+    df = df.drop_duplicates(subset=['date'], keep='first')
+    print(f"删除重复日期后: {len(df)}")
+    
+    # 4. 按日期排序
+    df = df.sort_values('date').reset_index(drop=True)
+    
+    # 5. 重置索引
+    df.reset_index(drop=True, inplace=True)
+    
+    return df
+
+# 处理异常值（使用z-score方法）
+def remove_outliers(df, column='close', threshold=3):
+    """移除异常值"""
+    z_scores = np.abs((df[column] - df[column].mean()) / df[column].std())
+    df_clean = df[z_scores < threshold]
+    print(f"删除异常值后: {len(df_clean)}")
+    return df_clean
+
+# 计算收益率
+def calculate_returns(df):
+    """计算收益率"""
+    df['returns'] = df['close'].pct_change()
+    df['log_returns'] = np.log(df['close'] / df['close'].shift(1))
+    return df
+
+# 示例使用
+df_cleaned = clean_stock_data(df)
+df_cleaned = remove_outliers(df_cleaned)
+df_cleaned = calculate_returns(df_cleaned)
+
+print("\n清洗后的数据:")
+print(df_cleaned.head())</code></pre>
+        </div>
+    </div>
+
+    <div class="card warning">
+        <h3>⚠️ 复权处理的重要性</h3>
+        <p>股票有分红、送股、配股时，股价会出现断崖式下跌。前复权和后复权处理是回测前必须做的。</p>
+        <pre><code># baostock支持前复权和后复权
+rs = bs.query_history_k_data_plus(
+    "sz.000001",
+    "date,code,open,high,low,close,volume",
+    start_date='2024-01-01',
+    end_date='2024-12-31',
+    frequency="d",
+    adjust="qfq"  # 前复权
+)</code></pre>
+    </div>
+</section>
+
+<!-- 导航按钮 -->
+<div class="navigation-buttons">
+    <a href="/learn/python" class="btn btn-secondary">← 上一课：Python基础</a>
+    <a href="/learn/indicators" class="btn btn-primary">下一课：技术分析指标 →</a>
+</div>
+
+{% endblock %}

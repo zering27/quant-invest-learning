@@ -1,0 +1,278 @@
+{% extends "learn_base.html" %}
+
+{% block title %}Python金融编程基础 - 量化投资学习系统{% endblock %}
+
+{% block progress %}20{% endblock %}
+{% block progress_text %}模块1: Python金融编程{% endblock %}
+
+{% block content %}
+<div class="module-header">
+    <h1>📊 模块1: Python金融编程基础</h1>
+    <p class="subtitle">学习Python在量化投资领域的基础应用</p>
+</div>
+
+<!-- 1.1 为什么用Python做量化 -->
+<section id="why-python" class="section">
+    <h2>1.1 为什么用Python做量化？</h2>
+    
+    <div class="card">
+        <h3>🎯 Python的三大优势</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>📖 易学易用</h4>
+                <p>语法简洁，入门门槛低，适合金融从业者快速上手。相比C++/Java，学习曲线平缓很多。</p>
+            </div>
+            <div class="feature-item">
+                <h4>🌴 生态丰富</h4>
+                <p>拥有完善的科学计算库（Pandas、NumPy、SciPy）和金融分析库（ta-lib、akshare、baostock）。</p>
+            </div>
+            <div class="feature-item">
+                <h4>💰 成本低</h4>
+                <p>开源免费，无需购买昂贵的MATLAB或Bloomberg终端，学生和散户也能玩得起量化。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card warning">
+        <h3>⚠️ 注意事项</h3>
+        <p>Python是解释型语言，执行效率不如C++，不适合高频交易。对于低频量化策略来说足够了。</p>
+    </div>
+</section>
+
+<!-- 1.2 Pandas基础 -->
+<section id="pandas-basics" class="section">
+    <h2>1.2 Pandas基础</h2>
+    
+    <p>Pandas是Python量化分析的核心库，提供了Series和DataFrame两种主要数据结构。</p>
+
+    <div class="card">
+        <h3>📊 Series数据结构</h3>
+        <p>Series类似于一维数组，每个元素有一个索引标签。</p>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import pandas as pd
+
+# 创建Series
+prices = pd.Series([100, 105, 102, 108, 110], 
+                   index=['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
+print(prices)
+print(f"平均值: {prices.mean()}")
+print(f"最高价: {prices.max()}")</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>Mon    100
+Tue    105
+Wed    102
+Thu    108
+Fri    110
+dtype: int64
+平均值: 105.0
+最高价: 110</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📋 DataFrame数据结构</h3>
+        <p>DataFrame是二维表格数据结构，类似Excel表格或SQL表，是量化分析中最常用的结构。</p>
+        
+        <div class="code-section">
+            <h4>代码示例：创建股票数据表</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# 创建股票OHLCV数据
+data = {
+    'date': ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'],
+    'open': [100, 102, 101, 103, 105],
+    'high': [105, 107, 106, 108, 110],
+    'low': [99, 100, 100, 102, 104],
+    'close': [102, 105, 103, 106, 108],
+    'volume': [1000000, 1200000, 1100000, 1300000, 1500000]
+}
+
+df = pd.DataFrame(data)
+print(df)
+print(f"\n数据形状: {df.shape}")
+print(f"列名: {df.columns.tolist()}")</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>         date  open  high  low  close    volume
+0  2024-01-01   100   105   99    102  1000000
+1  2024-01-02   102   107  100    105  1200000
+2  2024-01-03   101   106  100    103  1100000
+3  2024-01-04   103   108  102    106  1300000
+4  2024-01-05   105   110  104    108  1500000
+
+数据形状: (5, 6)
+列名: ['date', 'open', 'high', 'low', 'close', 'volume']</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🧹 数据清洗</h3>
+        <p>实际数据中经常有缺失值、异常值，需要进行清洗处理。</p>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python"># 处理缺失值
+df['close'].fillna(df['close'].mean(), inplace=True)  # 用均值填充
+df.dropna(inplace=True)  # 删除包含缺失值的行
+
+# 处理异常值（使用IQR方法）
+Q1 = df['close'].quantile(0.25)
+Q3 = df['close'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+df = df[(df['close'] >= lower_bound) & (df['close'] <= upper_bound)]
+
+# 计算日收益率
+df['returns'] = df['close'].pct_change()
+
+print(df)</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 1.3 NumPy数学计算 -->
+<section id="numpy-math" class="section">
+    <h2>1.3 NumPy数学计算</h2>
+    
+    <p>NumPy提供高性能的多维数组对象和数学函数，是Pandas和科学计算的基础。</p>
+
+    <div class="card">
+        <h3>🔢 数组运算</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import numpy as np
+
+# 创建数组
+prices = np.array([100, 105, 102, 108, 110])
+
+# 基本统计
+print(f"均值: {np.mean(prices):.2f}")
+print(f"标准差: {np.std(prices):.2f}")
+print(f"最大值: {np.max(prices)}")
+print(f"最小值: {np.min(prices)}")
+
+# 计算收益率
+returns = np.diff(prices) / prices[:-1]
+print(f"收益率: {returns}")
+
+# 向量化运算
+ma_5 = np.convolve(prices, np.ones(5)/5, mode='valid')
+print(f"5日均线: {ma_5}")</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📐 矩阵运算</h3>
+        <p>NumPy的矩阵运算在组合优化和风险计算中非常重要。</p>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python"># 计算协方差矩阵
+returns_matrix = np.array([[0.01, 0.02, 0.015],
+                           [0.02, 0.01, 0.01],
+                           [0.015, 0.01, 0.02]])
+
+cov_matrix = np.cov(returns_matrix)
+print("协方差矩阵:")
+print(cov_matrix)
+
+# 矩阵乘法
+weights = np.array([0.4, 0.3, 0.3])
+portfolio_return = np.dot(weights, returns_matrix.mean(axis=1))
+print(f"\n组合预期收益: {portfolio_return:.4f}")</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 1.4 数据可视化 -->
+<section id="visualization" class="section">
+    <h2>1.4 数据可视化</h2>
+    
+    <p>可视化是量化分析的重要环节，能帮助我们直观理解市场数据和策略效果。</p>
+
+    <div class="card">
+        <h3>📈 Matplotlib基础</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：绘制K线图</h4>
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+# 模拟股票数据
+dates = pd.date_range('2024-01-01', periods=30)
+close = 100 + np.cumsum(np.random.randn(30) * 2)
+
+# 创建图形
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), 
+                                gridspec_kw={'height_ratios': [3, 1]})
+
+# 绘制价格走势
+ax1.plot(dates, close, 'b-', linewidth=1.5, label='收盘价')
+ax1.fill_between(dates, close, alpha=0.3)
+ax1.set_title('股票价格走势', fontsize=14)
+ax1.set_ylabel('价格')
+ax1.legend()
+ax1.grid(True, alpha=0.3)
+
+# 绘制成交量
+volume = np.random.randint(1000000, 5000000, 30)
+colors = ['red' if close[i] < close[i-1] else 'green' for i in range(1, 30)]
+colors.insert(0, 'green')
+ax2.bar(dates, volume, color=colors, alpha=0.7)
+ax2.set_ylabel('成交量')
+ax2.set_xlabel('日期')
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🎨 Plotly交互式图表</h3>
+        <p>Plotly可以创建交互式图表，适合在网页中展示。</p>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import plotly.graph_objects as go
+import pandas as pd
+import numpy as np
+
+# 创建K线图
+fig = go.Figure(data=[go.Candlestick(
+    x=['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'],
+    open=[100, 102, 101, 103, 105],
+    high=[105, 107, 106, 108, 110],
+    low=[99, 100, 100, 102, 104],
+    close=[102, 105, 103, 106, 108]
+)])
+
+fig.update_layout(
+    title='股票K线图',
+    yaxis_title='价格',
+    xaxis_rangeslider_visible=False
+)
+
+fig.show()</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 导航按钮 -->
+<div class="navigation-buttons">
+    <a href="/learn" class="btn btn-secondary">← 返回学习中心</a>
+    <a href="/learn/data" class="btn btn-primary">下一课：金融市场数据 →</a>
+</div>
+
+{% endblock %}

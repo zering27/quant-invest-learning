@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>策略回测 - 量化投资学习系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">量化投资学习系统</a>
+            <ul class="nav-menu">
+                <li><a href="/">首页</a></li>
+                <li><a href="/dashboard">仪表盘</a></li>
+                <li><a href="/backtest" class="active">回测</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>策略回测</h1>
+
+        <section class="backtest-form">
+            <form id="backtestForm">
+                <div class="form-group">
+                    <label for="stockCode">股票代码</label>
+                    <input type="text" id="stockCode" name="stockCode" value="600000" placeholder="如: 600000">
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate">开始日期</label>
+                    <input type="date" id="startDate" name="startDate" value="2020-01-01">
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">结束日期</label>
+                    <input type="date" id="endDate" name="endDate" value="2024-12-31">
+                </div>
+
+                <div class="form-group">
+                    <label for="initialCapital">初始资金</label>
+                    <input type="number" id="initialCapital" name="initialCapital" value="1000000">
+                </div>
+
+                <div class="form-group">
+                    <label for="strategy">策略选择</label>
+                    <select id="strategy" name="strategy">
+                        <option value="ma_cross">均线交叉策略</option>
+                        <option value="rsi">RSI超买超卖策略</option>
+                        <option value="bollinger">布林带策略</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary">开始回测</button>
+            </form>
+        </section>
+
+        <section id="results" class="results hidden">
+            <h2>回测结果</h2>
+            <div id="metrics" class="metrics-grid"></div>
+            <div id="equityChart" class="chart-container"></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 量化投资学习系统 - 仅供学习交流使用</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/backtest.js') }}"></script>
+</body>
+</html>

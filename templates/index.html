@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>量化投资学习系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">量化投资学习系统</a>
+            <ul class="nav-menu">
+                <li><a href="/">首页</a></li>
+                <li><a href="/dashboard">仪表盘</a></li>
+                <li><a href="/backtest">回测</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>Welcome to 量化投资学习系统</h1>
+            <p>学习量化投资策略，从入门到实战</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="features">
+            <h2>功能模块</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>数据获取</h3>
+                    <p>支持baostock、akshare等数据源，获取股票历史数据</p>
+                </div>
+                <div class="feature-card">
+                    <h3>技术指标</h3>
+                    <p>计算MA、RSI、MACD、布林带等多种技术指标</p>
+                </div>
+                <div class="feature-card">
+                    <h3>回测引擎</h3>
+                    <p>支持多种策略回测，评估策略性能</p>
+                </div>
+                <div class="feature-card">
+                    <h3>风险管理</h3>
+                    <p>内置止损止盈机制，控制投资风险</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="quick-start">
+            <h2>快速开始</h2>
+            <div class="code-block">
+                <code>
+# 1. 安装依赖<br>
+pip install -r requirements.txt<br><br>
+# 2. 运行应用<br>
+python app.py<br><br>
+# 3. 访问<br>
+http://localhost:5000
+                </code>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 量化投资学习系统 - 仅供学习交流使用</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

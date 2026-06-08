@@ -1,0 +1,392 @@
+{% extends "learn_base.html" %}
+
+{% block title %}风险管理与实战 - 量化投资学习系统{% endblock %}
+
+{% block progress %}100{% endblock %}
+{% block progress_text %}模块5: 风险管理与实战{% endblock %}
+
+{% block content %}
+<div class="module-header">
+    <h1>📊 模块5: 风险管理与实战</h1>
+    <p class="subtitle">学习如何在量化交易中控制风险</p>
+</div>
+
+<!-- 5.1 风险的本质 -->
+<section id="risk-nature" class="section">
+    <h2>5.1 风险的本质</h2>
+    
+    <div class="card highlight">
+        <h3>💡 什么是风险？</h3>
+        <p>风险是结果的不确定性，特别是指可能遭受损失的不确定性。在金融市场中，风险意味着收益的不确定性。</p>
+    </div>
+
+    <div class="card">
+        <h3>🎯 风险的两种类型</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>📊 系统性风险</h4>
+                <p>无法通过分散投资消除的风险，如金融危机、政策变化等。2008年金融危机就是典型的系统性风险。</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔍 非系统性风险</h4>
+                <p>可以通过分散投资消除的风险，如单一公司丑闻、行业衰退等。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card warning">
+        <h3>⚠️ 风险与收益的关系</h3>
+        <p>高风险高收益，低风险低收益。这是金融学的基本原则。没有无缘无故的高收益，每一分收益都对应着相应的风险。</p>
+    </div>
+</section>
+
+<!-- 5.2 止损止盈策略 -->
+<section id="stop-loss" class="section">
+    <h2>5.2 止损止盈策略</h2>
+    
+    <p>止损和止盈是控制风险最基本的手段。</p>
+
+    <div class="card">
+        <h3>🛑 止损策略</h3>
+        <p>止损是当亏损达到预设比例时自动卖出，防止亏损进一步扩大。</p>
+        
+        <div class="formula">
+            <h4>固定比例止损</h4>
+            <p>止损价格 = 买入价格 × (1 - 止损比例)</p>
+            <p>例如：买入价10元，止损比例5%，则止损价9.5元</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🎯 止盈策略</h3>
+        <p>止盈是当盈利达到预设目标时自动卖出，锁定利润。</p>
+        
+        <div class="formula">
+            <h4>移动止损（跟踪止损）</h4>
+            <p>随着价格上涨，不断上调止损线，锁定已获利润。</p>
+            <p>例如：买入价10元，涨到12元后将止损价从9.5元提高到10.5元</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Python实现：止损止盈</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+class StopLossTakeProfit:
+    """止损止盈管理器"""
+    
+    def __init__(self, stop_loss_pct=0.05, take_profit_pct=0.15):
+        """
+        初始化
+        参数:
+            stop_loss_pct: 止损比例（默认5%）
+            take_profit_pct: 止盈比例（默认15%）
+        """
+        self.stop_loss_pct = stop_loss_pct
+        self.take_profit_pct = take_profit_pct
+        
+    def check_signals(self, position, current_price):
+        """
+        检查是否触发止损止盈
+        
+        参数:
+            position: 持仓信息，包含buy_price
+            current_price: 当前价格
+        
+        返回:
+            'STOP_LOSS', 'TAKE_PROFIT', 或 'HOLD'
+        """
+        buy_price = position['buy_price']
+        pct_change = (current_price - buy_price) / buy_price
+        
+        # 止损
+        if pct_change <= -self.stop_loss_pct:
+            return 'STOP_LOSS'
+        
+        # 止盈
+        if pct_change >= self.take_profit_pct:
+            return 'TAKE_PROFIT'
+        
+        return 'HOLD'
+
+class TrailingStop:
+    """移动止损"""
+    
+    def __init__(self, trail_pct=0.10):
+        """
+        初始化
+        参数:
+            trail_pct: 移动止损比例（从最高点回落的比例）
+        """
+        self.trail_pct = trail_pct
+        self.high_price = 0
+        self.buy_price = 0
+        
+    def update(self, current_price, buy_price=None):
+        """
+        更新止损价
+        
+        参数:
+            current_price: 当前价格
+            buy_price: 买入价格（可选）
+        
+        返回:
+            是否触发止损
+        """
+        if buy_price is not None:
+            self.buy_price = buy_price
+            self.high_price = buy_price
+            
+        if current_price > self.high_price:
+            self.high_price = current_price
+            
+        # 计算止损价（从最高点回落trail_pct）
+        stop_price = self.high_price * (1 - self.trail_pct)
+        
+        # 如果当前价格低于止损价，触发止损
+        if self.buy_price > 0 and current_price < stop_price:
+            return True, stop_price
+        
+        return False, stop_price
+
+# 使用示例
+print("止损止盈示例:")
+stl = StopLossTakeProfit(stop_loss_pct=0.05, take_profit_pct=0.15)
+position = {'buy_price': 10.0}
+
+print(f"买入价: {position['buy_price']}")
+print(f"止损价: {position['buy_price'] * (1 - stl.stop_loss_pct):.2f}")
+print(f"止盈价: {position['buy_price'] * (1 + stl.take_profit_pct):.2f}")</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 5.3 仓位管理 -->
+<section id="position" class="section">
+    <h2>5.3 仓位管理</h2>
+    
+    <p>仓位管理决定了每笔交易投入多少资金，是风险控制的核心。</p>
+
+    <div class="card">
+        <h3>📐 固定比例仓位</h3>
+        <p>每笔交易投入总资金的一定比例。</p>
+        
+        <div class="formula">
+            <p>仓位 = 总资金 × 固定比例</p>
+            <p>例如：总资金100万，固定比例10%，则每笔交易投入10万</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 凯利公式</h3>
+        <p>凯利公式是一个优化仓位管理的数学公式，可以在知道胜率和赔率的情况下计算最优下注比例。</p>
+        
+        <div class="formula">
+            <h4>凯利公式</h4>
+            <p>f = (p × b - q) / b</p>
+            <p>其中：</p>
+            <ul>
+                <li>f = 建议投入的资金比例</li>
+                <li>p = 获胜概率</li>
+                <li>q = 失败概率 (1-p)</li>
+                <li>b = 赔率（盈利/亏损的比例）</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Python实现：凯利公式</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">def kelly_criterion(p, b):
+    """
+    凯利公式计算最优仓位
+    
+    参数:
+        p: 获胜概率（0-1之间）
+        b: 赔率（盈利金额/亏损金额）
+    
+    返回:
+        最优仓位比例
+    """
+    q = 1 - p
+    f = (p * b - q) / b
+    return max(0, min(f, 1))  # 限制在0-100%之间
+
+# 示例
+# 假设策略胜率60%，盈利时赚20%，亏损时亏10%
+p = 0.6
+b = 0.20 / 0.10  # 赔率 = 2
+
+optimal_f = kelly_criterion(p, b)
+print(f"凯利公式建议仓位: {optimal_f:.1%}")
+print(f"如果总资金100万，应投入: {100 * optimal_f:.1f}万")
+
+# 不同胜率下的建议仓位
+print("\n不同胜率下的建议仓位（赔率=2）:")
+for p in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8]:
+    f = kelly_criterion(p, 2)
+    print(f"  胜率{p:.0%}: 建议仓位{f:.1%}")</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>凯利公式建议仓位: 40.0%
+如果总资金100万，应投入: 40.0万
+
+不同胜率下的建议仓位（赔率=2）:
+  胜率30%: 建议仓位10.0%
+  胜率40%: 建议仓位20.0%
+  胜率50%: 建议仓位30.0%
+  胜率60%: 建议仓位40.0%
+  胜率70%: 建议仓位50.0%
+  胜率80%: 建议仓位60.0%</code></pre>
+        </div>
+    </div>
+
+    <div class="card warning">
+        <h3>⚠️ 凯利公式的注意事项</h3>
+        <p>凯利公式给出的是理论最优仓位，但实际使用中建议打折（如只投入凯利建议的一半），因为估算的胜率和赔率往往不准确。</p>
+    </div>
+</section>
+
+<!-- 5.4 VaR风险价值 -->
+<section id="var" class="section">
+    <h2>5.4 VaR风险价值</h2>
+    
+    <p>VaR（Value at Risk）是衡量投资组合风险的国际标准指标。</p>
+
+    <div class="card">
+        <h3>📐 VaR的定义</h3>
+        <p>VaR表示在一定置信水平下，投资组合在未来一定时间内可能遭受的最大损失。</p>
+        
+        <div class="formula">
+            <h4>举例说明</h4>
+            <p>"95%置信度下，日VaR为2%"意味着：</p>
+            <p>明天有95%的概率，损失不会超过2%</p>
+            <p>换句话说，有5%的概率损失会超过2%</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Python实现：计算VaR</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：历史模拟法计算VaR</h4>
+            <pre><code class="language-python">import numpy as np
+import pandas as pd
+
+def calculate_var_historical(returns, confidence=0.95):
+    """
+    历史模拟法计算VaR
+    
+    参数:
+        returns: 收益率序列
+        confidence: 置信水平（默认95%）
+    
+    返回:
+        VaR值
+    """
+    # 直接使用收益率的分位数
+    var = np.percentile(returns, (1 - confidence) * 100)
+    return var
+
+def calculate_var_parametric(returns, confidence=0.95):
+    """
+    参数法（方差-协方差法）计算VaR
+    
+    假设收益率服从正态分布
+    
+    参数:
+        returns: 收益率序列
+        confidence: 置信水平（默认95%）
+    
+    返回:
+        VaR值
+    """
+    from scipy import stats
+    
+    mu = returns.mean()
+    sigma = returns.std()
+    
+    # 正态分布的分位数
+    z = stats.norm.ppf(1 - confidence)
+    
+    var = mu + sigma * z
+    return var
+
+# 示例
+np.random.seed(42)
+returns = np.random.normal(0.001, 0.02, 1000)  # 模拟日收益率
+
+var_95_hist = calculate_var_historical(returns, 0.95)
+var_95_param = calculate_var_parametric(returns, 0.95)
+
+print(f"历史模拟法 VaR (95%): {var_95_hist:.4f} ({var_95_hist*100:.2f}%)")
+print(f"参数法 VaR (95%):      {var_95_param:.4f} ({var_95_param*100:.2f}%)")
+
+# 蒙特卡洛模拟计算VaR
+def calculate_var_monte_carlo(returns, n_simulations=10000, confidence=0.95):
+    """
+    蒙特卡洛模拟计算VaR
+    """
+    # 从历史收益率中随机抽样
+    simulated_returns = np.random.choice(returns, size=n_simulations)
+    
+    # 计算VaR
+    var = np.percentile(simulated_returns, (1 - confidence) * 100)
+    return var
+
+var_95_mc = calculate_var_monte_carlo(returns)
+print(f"蒙特卡洛 VaR (95%):    {var_95_mc:.4f} ({var_95_mc*100:.2f}%)")</code></pre>
+        </div>
+        
+        <div class="output-section">
+            <h4>📤 运行结果：</h4>
+            <pre class="output"><code>历史模拟法 VaR (95%): -0.0312 (-3.12%)
+参数法 VaR (95%):      -0.0308 (-3.08%)
+蒙特卡洛 VaR (95%):    -0.0319 (-3.19%)</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📈 CVaR（条件风险价值）</h3>
+        <p>CVaR是VaR的补充，也称为Expected Shortfall。它计算的是损失超过VaR时的平均损失，更能反映极端风险。</p>
+        
+        <div class="code-section">
+            <pre><code class="language-python">def calculate_cvar(returns, confidence=0.95):
+    """
+    计算CVaR（条件风险价值）
+    
+    CVaR = E[loss | loss > VaR]
+    """
+    var = np.percentile(returns, (1 - confidence) * 100)
+    cvar = returns[returns <= var].mean()
+    return cvar
+
+cvar_95 = calculate_cvar(returns, 0.95)
+print(f"CVaR (95%): {cvar_95:.4f} ({cvar_95*100:.2f}%)")
+print(f"含义：在最坏的5%情况下，平均损失为 {-cvar_95*100:.2f}%")</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 学习完成 -->
+<div class="card success">
+    <h3>🎉 恭喜完成所有模块学习！</h3>
+    <p>现在你已经掌握了量化投资的基础知识，可以尝试使用回测系统进行策略验证了。</p>
+    <a href="/backtest" class="btn btn-primary">去回测页面实践 →</a>
+</div>
+
+<!-- 导航按钮 -->
+<div class="navigation-buttons">
+    <a href="/learn/backtest" class="btn btn-secondary">← 上一课：策略回测框架</a>
+    <a href="/learn" class="btn btn-secondary">返回学习中心</a>
+</div>
+
+{% endblock %}

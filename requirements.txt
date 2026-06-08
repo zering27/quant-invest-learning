@@ -1,0 +1,7 @@
+flask
+baostock
+pandas
+numpy
+plotly
+akshare
+gunicorn

@@ -1,0 +1,391 @@
+{% extends "learn_base.html" %}
+
+{% block title %}策略回测框架 - 量化投资学习系统{% endblock %}
+
+{% block progress %}80{% endblock %}
+{% block progress_text %}模块4: 策略回测框架{% endblock %}
+
+{% block content %}
+<div class="module-header">
+    <h1>📊 模块4: 策略回测框架</h1>
+    <p class="subtitle">学习如何验证量化策略的有效性</p>
+</div>
+
+<!-- 4.1 为什么需要回测 -->
+<section id="why-backtest" class="section">
+    <h2>4.1 为什么需要回测？</h2>
+    
+    <div class="card highlight">
+        <h3>💡 回测的定义</h3>
+        <p>回测是指用历史数据模拟策略的执行，评估策略在过去的盈利能力。回测是量化交易的核心环节。</p>
+    </div>
+
+    <div class="card">
+        <h3>🎯 回测的三大价值</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>🔍 验证策略有效性</h4>
+                <p>通过回测可以知道一个策略在历史数据上表现如何，是否值得实盘使用。</p>
+            </div>
+            <div class="feature-item">
+                <h4>⚠️ 避免过度拟合</h4>
+                <p>如果策略在回测中表现过于完美（如95%胜率），很可能存在过度拟合，需要警惕。</p>
+            </div>
+            <div class="feature-item">
+                <h4>📊 优化参数</h4>
+                <p>通过回测可以找出策略的最优参数，如均线周期的选择。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card warning">
+        <h3>⚠️ 回测的局限性</h3>
+        <p>过去的表现不能代表未来的收益！市场环境会变化，策略可能失效。回测结果只能作为参考，不能作为保证。</p>
+    </div>
+</section>
+
+<!-- 4.2 事件驱动回测原理 -->
+<section id="event-driven" class="section">
+    <h2>4.2 事件驱动回测原理</h2>
+    
+    <div class="card">
+        <h3>📐 回测框架类型</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>🔄 向量化回测</h4>
+                <p>使用Pandas/Numpy一次性计算所有信号，速度快但不够灵活。</p>
+            </div>
+            <div class="feature-item">
+                <h4>⚡ 事件驱动回测</h4>
+                <p>逐条模拟订单执行，更接近真实交易，能处理复杂逻辑。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 事件驱动回测流程</h3>
+        <pre><code>1. 初始化：设置初始资金、手续费率等参数
+2. 加载数据：将历史数据按日期排序
+3. 循环遍历：
+   a. 读取当日数据
+   b. 计算技术指标
+   c. 根据策略生成信号
+   d. 执行交易（买入/卖出/持有）
+   e. 更新持仓和资金
+4. 计算绩效指标
+5. 生成报告</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>📝 Python实现：简单事件驱动回测框架</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+class SimpleBacktester:
+    """简单事件驱动回测框架"""
+    
+    def __init__(self, initial_capital=1000000, commission=0.0003):
+        """
+        初始化回测框架
+        参数:
+            initial_capital: 初始资金
+            commission: 手续费率（默认万分之3）
+        """
+        self.initial_capital = initial_capital
+        self.commission = commission
+        self.cash = initial_capital
+        self.position = 0  # 持仓股数
+        self.trades = []   # 交易记录
+        self.equity = []   # 每日权益
+        
+    def buy(self, date, price, shares):
+        """买入"""
+        cost = price * shares * (1 + self.commission)
+        if self.cash >= cost:
+            self.cash -= cost
+            self.position += shares
+            self.trades.append({
+                'date': date,
+                'action': 'BUY',
+                'price': price,
+                'shares': shares,
+                'cost': cost
+            })
+            
+    def sell(self, date, price, shares):
+        """卖出"""
+        if self.position >= shares:
+            revenue = price * shares * (1 - self.commission)
+            self.cash += revenue
+            self.position -= shares
+            self.trades.append({
+                'date': date,
+                'action': 'SELL',
+                'price': price,
+                'shares': shares,
+                'revenue': revenue
+            })
+            
+    def run(self, df, strategy_func):
+        """
+        运行回测
+        参数:
+            df: 包含date, open, high, low, close列的DataFrame
+            strategy_func: 策略函数，输入当日数据，输出交易信号
+        """
+        for i, row in df.iterrows():
+            date = row['date']
+            signal = strategy_func(row, i, df)
+            
+            if signal == 'BUY' and self.cash > 0:
+                shares = int(self.cash / row['close'] / 100) * 100  # 按手买
+                if shares > 0:
+                    self.buy(date, row['close'], shares)
+                    
+            elif signal == 'SELL' and self.position > 0:
+                self.sell(date, row['close'], self.position)
+            
+            # 记录每日权益
+            equity = self.cash + self.position * row['close']
+            self.equity.append({'date': date, 'equity': equity})
+            
+        return self.get_results()
+    
+    def get_results(self):
+        """获取回测结果"""
+        equity_df = pd.DataFrame(self.equity)
+        return {
+            'trades': pd.DataFrame(self.trades),
+            'equity': equity_df,
+            'final_equity': self.equity[-1]['equity'] if self.equity else self.initial_capital
+        }
+
+print("事件驱动回测框架已定义")</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 4.3 均线交叉策略实现 -->
+<section id="ma-cross" class="section">
+    <h2>4.3 均线交叉策略实现</h2>
+    
+    <p>均线交叉策略是最经典的趋势跟随策略之一。</p>
+
+    <div class="card">
+        <h3>📐 策略原理</h3>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>📈 金叉买入</h4>
+                <p>短期均线上穿长期均线（如MA5上穿MA20），表示短期趋势向上，看多。</p>
+            </div>
+            <div class="feature-item">
+                <h4>📉 死叉卖出</h4>
+                <p>短期均线下穿长期均线（如MA5下穿MA20），表示短期趋势向下，看空。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 均线交叉策略代码</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+def ma_cross_strategy(row, i, df, short=5, long=20):
+    """
+    均线交叉策略
+    
+    参数:
+        row: 当日数据
+        i: 当前索引
+        df: 完整数据
+        short: 短期均线周期
+        long: 长期均线周期
+    
+    返回:
+        'BUY', 'SELL', 或 'HOLD'
+    """
+    if i < long:
+        return 'HOLD'
+    
+    # 获取历史数据
+    history = df.iloc[:i+1]
+    
+    # 计算均线
+    short_ma = history['close'].rolling(window=short).mean().iloc[-1]
+    long_ma = history['close'].rolling(window=long).mean().iloc[-1]
+    
+    # 前一日均线
+    prev_short = history['close'].rolling(window=short).mean().iloc[-2]
+    prev_long = history['close'].rolling(window=long).mean().iloc[-2]
+    
+    # 金叉：短期均线从下方穿过长期均线
+    if prev_short <= prev_long and short_ma > long_ma:
+        return 'BUY'
+    
+    # 死叉：短期均线从上方穿过长期均线
+    if prev_short >= prev_long and short_ma < long_ma:
+        return 'SELL'
+    
+    return 'HOLD'
+
+# 使用示例
+def run_ma_cross_backtest(df, short=5, long=20, initial_capital=1000000):
+    """运行均线交叉策略回测"""
+    bt = SimpleBacktester(initial_capital)
+    results = bt.run(df, lambda row, i, df: ma_cross_strategy(row, i, df, short, long))
+    return results
+
+# 生成示例数据
+np.random.seed(42)
+dates = pd.date_range('2024-01-01', periods=100)
+close = 100 + np.cumsum(np.random.randn(100) * 2)
+df = pd.DataFrame({'date': dates, 'close': close})
+
+# 运行回测
+results = run_ma_cross_backtest(df, short=5, long=20)
+print(f"最终权益: {results['final_equity']:.2f}")
+print(f"交易次数: {len(results['trades'])}")</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 4.4 绩效评估指标 -->
+<section id="performance" class="section">
+    <h2>4.4 绩效评估指标</h2>
+    
+    <p>回测完成后，需要用多个指标来评估策略表现。</p>
+
+    <div class="card">
+        <h3>📊 核心绩效指标</h3>
+        <table class="data-table">
+            <tr>
+                <th>指标</th>
+                <th>计算方法</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td>总收益率</td>
+                <td>(最终权益-初始资金)/初始资金</td>
+                <td>策略总体盈利情况</td>
+            </tr>
+            <tr>
+                <td>年化收益率</td>
+                <td>总收益率 / 回测年数</td>
+                <td>折算到每年的收益</td>
+            </tr>
+            <tr>
+                <td>夏普比率</td>
+                <td>(年化收益-无风险利率) / 收益波动率</td>
+                <td>风险调整后收益，越高越好</td>
+            </tr>
+            <tr>
+                <td>最大回撤</td>
+                <td>最大峰值-最大谷值</td>
+                <td>历史最大亏损，越小越好</td>
+            </tr>
+            <tr>
+                <td>胜率</td>
+                <td>盈利交易次数 / 总交易次数</td>
+                <td>交易的成功率</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>📐 Python实现：绩效计算</h3>
+        
+        <div class="code-section">
+            <h4>代码示例：</h4>
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+def calculate_performance_metrics(equity_df, trades_df, initial_capital=1000000):
+    """
+    计算绩效指标
+    
+    参数:
+        equity_df: 每日权益DataFrame，包含date和equity列
+        trades_df: 交易记录DataFrame
+    
+    返回:
+        绩效指标字典
+    """
+    # 总收益率
+    final_equity = equity_df['equity'].iloc[-1]
+    total_return = (final_equity - initial_capital) / initial_capital
+    
+    # 年化收益率（假设一年252个交易日）
+    days = len(equity_df)
+    years = days / 252
+    annual_return = (1 + total_return) ** (1/years) - 1 if years > 0 else 0
+    
+    # 最大回撤
+    equity_df['peak'] = equity_df['equity'].cummax()
+    equity_df['drawdown'] = (equity_df['equity'] - equity_df['peak']) / equity_df['peak']
+    max_drawdown = equity_df['drawdown'].min()
+    
+    # 夏普比率
+    daily_returns = equity_df['equity'].pct_change().dropna()
+    sharpe_ratio = np.sqrt(252) * daily_returns.mean() / daily_returns.std() if daily_returns.std() > 0 else 0
+    
+    # 胜率
+    if len(trades_df) > 0:
+        sell_trades = trades_df[trades_df['action'] == 'SELL']
+        if len(sell_trades) > 0:
+            winning_trades = 0
+            for i, trade in sell_trades.iterrows():
+                buy_trade = trades_df[(trades_df['action'] == 'BUY') & 
+                                       (trades_df['date'] < trade['date'])].iloc[-1]
+                if trade['price'] > buy_trade['price']:
+                    winning_trades += 1
+            win_rate = winning_trades / len(sell_trades)
+        else:
+            win_rate = 0
+    else:
+        win_rate = 0
+    
+    return {
+        'total_return': total_return,
+        'annual_return': annual_return,
+        'max_drawdown': max_drawdown,
+        'sharpe_ratio': sharpe_ratio,
+        'win_rate': win_rate,
+        'final_equity': final_equity,
+        'num_trades': len(trades_df)
+    }
+
+# 使用示例
+metrics = calculate_performance_metrics(
+    results['equity'], 
+    results['trades'],
+    initial_capital=1000000
+)
+
+print("=" * 40)
+print("回测绩效报告")
+print("=" * 40)
+print(f"总收益率:    {metrics['total_return']:.2%}")
+print(f"年化收益率:  {metrics['annual_return']:.2%}")
+print(f"夏普比率:    {metrics['sharpe_ratio']:.2f}")
+print(f"最大回撤:    {metrics['max_drawdown']:.2%}")
+print(f"胜率:        {metrics['win_rate']:.2%}")
+print(f"交易次数:    {metrics['num_trades']}")
+print(f"最终权益:    {metrics['final_equity']:.2f}")
+print("=" * 40)</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- 导航按钮 -->
+<div class="navigation-buttons">
+    <a href="/learn/indicators" class="btn btn-secondary">← 上一课：技术分析指标</a>
+    <a href="/learn/risk" class="btn btn-primary">下一课：风险管理与实战 →</a>
+</div>
+
+{% endblock %}

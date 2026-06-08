@@ -1,0 +1,137 @@
+{% extends "learn_base.html" %}
+
+{% block title %}学习中心 - 量化投资学习系统{% endblock %}
+
+{% block progress %}0{% endblock %}
+{% block progress_text %}学习中心{% endblock %}
+
+{% block content %}
+<div class="module-header">
+    <h1>📚 量化投资学习中心</h1>
+    <p class="subtitle">从零开始，系统学习量化投资策略</p>
+</div>
+
+<!-- 课程概述 -->
+<section class="section">
+    <h2>📖 课程概述</h2>
+    <div class="card highlight">
+        <h3>为什么要学习量化投资？</h3>
+        <p>量化投资是一种基于数学模型和计算机技术的投资方法，它可以帮助投资者：</p>
+        <ul style="margin: 15px 0; padding-left: 20px;">
+            <li>克服人为情绪的影响（贪婪、恐惧）</li>
+            <li>系统化地执行交易策略</li>
+            <li>在海量数据中发现投资机会</li>
+            <li>分散风险，提高收益的稳定性</li>
+        </ul>
+        <p>本课程将从Python基础开始，逐步深入到策略开发和风险管理，帮助你建立完整的量化投资知识体系。</p>
+    </div>
+</section>
+
+<!-- 学习路径 -->
+<section class="section">
+    <h2>🛤️ 学习路径</h2>
+    
+    <div class="card">
+        <h3>模块1: Python金融编程基础</h3>
+        <p>学习Python在量化分析中的核心工具：Pandas数据处理、NumPy数学计算、Matplotlib/Plotly可视化。</p>
+        <div class="feature-grid">
+            <div class="feature-item">📊 Pandas数据结构</div>
+            <div class="feature-item">🔢 NumPy数组运算</div>
+            <div class="feature-item">📈 数据可视化</div>
+            <div class="feature-item">🧹 数据清洗</div>
+        </div>
+        <a href="/learn/python" class="btn btn-primary" style="margin-top: 15px;">开始学习 →</a>
+    </div>
+
+    <div class="card">
+        <h3>模块2: 金融市场数据获取</h3>
+        <p>学习如何获取股票历史数据，了解数据质量的重要性，掌握数据预处理技术。</p>
+        <div class="feature-grid">
+            <div class="feature-item">📡 baostock数据源</div>
+            <div class="feature-item">📋 OHLCV数据结构</div>
+            <div class="feature-item">🧹 数据清洗</div>
+            <div class="feature-item">⚙️ 复权处理</div>
+        </div>
+        <a href="/learn/data" class="btn btn-primary" style="margin-top: 15px;">开始学习 →</a>
+    </div>
+
+    <div class="card">
+        <h3>模块3: 技术分析指标</h3>
+        <p>深入学习各种技术指标，理解其原理并用Python实现。趋势跟踪、振荡器、波动率指标全覆盖。</p>
+        <div class="feature-grid">
+            <div class="feature-item">📈 移动平均线MA</div>
+            <div class="feature-item">⚡ MACD指标</div>
+            <div class="feature-item">📉 RSI相对强弱</div>
+            <div class="feature-item">🎯 布林带</div>
+        </div>
+        <a href="/learn/indicators" class="btn btn-primary" style="margin-top: 15px;">开始学习 →</a>
+    </div>
+
+    <div class="card">
+        <h3>模块4: 策略回测框架</h3>
+        <p>学习如何验证策略有效性，理解回测的原理和局限性，掌握绩效评估方法。</p>
+        <div class="feature-grid">
+            <div class="feature-item">🔄 事件驱动回测</div>
+            <div class="feature-item">📊 均线交叉策略</div>
+            <div class="feature-item">📉 绩效指标</div>
+            <div class="feature-item">⚠️ 过度拟合</div>
+        </div>
+        <a href="/learn/backtest" class="btn btn-primary" style="margin-top: 15px;">开始学习 →</a>
+    </div>
+
+    <div class="card">
+        <h3>模块5: 风险管理与实战</h3>
+        <p>学习止损止盈、仓位管理、VaR等风控技术，建立完整的交易系统思维。</p>
+        <div class="feature-grid">
+            <div class="feature-item">🛑 止损止盈</div>
+            <div class="feature-item">📊 仓位管理</div>
+            <div class="feature-item">📉 VaR风险价值</div>
+            <div class="feature-item">⚖️ 凯利公式</div>
+        </div>
+        <a href="/learn/risk" class="btn btn-primary" style="margin-top: 15px;">开始学习 →</a>
+    </div>
+</section>
+
+<!-- 学习建议 -->
+<section class="section">
+    <h2>💡 学习建议</h2>
+    <div class="card">
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h4>📝 动手实践</h4>
+                <p>每个模块都配有代码示例，建议你实际运行代码，理解每一步的含义。</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔄 循序渐进</h4>
+                <p>按照课程顺序学习，每个模块都是下一个模块的基础。</p>
+            </div>
+            <div class="feature-item">
+                <h4>📊 勤于回测</h4>
+                <p>学完策略模块后，使用回测系统验证自己的想法。</p>
+            </div>
+            <div class="feature-item">
+                <h4>⚠️ 风险意识</h4>
+                <p>始终记住：回测结果不代表未来收益，投资有风险，入市需谨慎。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 快速链接 -->
+<section class="section">
+    <h2>🔗 快速链接</h2>
+    <div class="card">
+        <div class="feature-grid">
+            <a href="/backtest" class="feature-item" style="text-decoration: none; color: inherit;">
+                <h4>📈 回测系统</h4>
+                <p>使用学到的策略进行回测验证</p>
+            </a>
+            <a href="/dashboard" class="feature-item" style="text-decoration: none; color: inherit;">
+                <h4>📊 数据仪表盘</h4>
+                <p>查看市场数据和可视化</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
